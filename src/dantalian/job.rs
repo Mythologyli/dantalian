@@ -65,11 +65,12 @@ impl Job {
             None => return Ok(None),
         };
         ep = if ep.is_empty() { String::from("0") } else { ep };
+        let ep: i32 = ep.parse::<i32>()? + config.ep_bias;
         let sp = caps
             .and_then(|c| c.name("sp"))
             .map_or(false, |mat| mat.as_str() != "");
         Ok(Some(EpisodeJob {
-            index: ep,
+            index: ep.to_string(),
             is_sp: sp,
             filename: String::from(
                 nfo_file_path

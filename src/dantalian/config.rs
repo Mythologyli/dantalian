@@ -12,12 +12,14 @@ use std::path::Path;
 struct ConfigFile {
     subject_id: u32,
     episode_re: Option<String>,
+    ep_bias: Option<i32>,
 }
 
 #[derive(Debug)]
 pub struct Config {
     pub subject_id: u32,
     pub episode_re: Regex,
+    pub ep_bias: i32,
 }
 
 const DIR_CONFIG_NAME: &str = "dantalian.toml";
@@ -41,6 +43,7 @@ impl Config {
             Some(re) => Ok(Config {
                 subject_id: cf.subject_id,
                 episode_re: Regex::new(&re)?,
+                ep_bias: cf.ep_bias.unwrap_or(0),
             }),
             None => {
                 let subject = get_subject(cf.subject_id).await?;
@@ -48,6 +51,7 @@ impl Config {
                 Ok(Config {
                     subject_id: cf.subject_id,
                     episode_re: default_ep_regex(&name_qry)?,
+                    ep_bias: cf.ep_bias.unwrap_or(0),
                 })
             }
         }
@@ -70,6 +74,7 @@ impl Config {
                 Ok(Config {
                     subject_id: subjects[0].id,
                     episode_re: default_ep_regex(&name)?,
+                    ep_bias: 0,
                 })
             }
             None => bail!("invalid name"),
@@ -80,6 +85,7 @@ impl Config {
         let file_content = toml::to_string(&ConfigFile {
             subject_id: self.subject_id,
             episode_re: Some(self.episode_re.to_string()),
+            ep_bias: Some(self.ep_bias),
         })?;
         let mut f = File::create(filepath)?;
         f.write_all(&file_content.into_bytes())?;
