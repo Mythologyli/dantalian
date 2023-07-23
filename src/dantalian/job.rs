@@ -58,12 +58,13 @@ impl Job {
             return Ok(None);
         }
         let caps = config.episode_re.captures(file_name);
-        let ep: String = match caps.as_ref().and_then(|c| c.name("ep")) {
+        let mut ep: String = match caps.as_ref().and_then(|c| c.name("ep")) {
             Some(ep_match) => {
                 String::from(ep_match.as_str().parse::<String>()?.trim_start_matches('0'))
             }
             None => return Ok(None),
         };
+        ep = if ep.is_empty() { String::from("0") } else { ep };
         let sp = caps
             .and_then(|c| c.name("sp"))
             .map_or(false, |mat| mat.as_str() != "");
